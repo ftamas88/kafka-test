@@ -1,1 +1,1 @@
-# kafka-test
+# Kafka Test Application

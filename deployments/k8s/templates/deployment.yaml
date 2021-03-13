@@ -1,0 +1,109 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ .Release.Name }}"
+  namespace: "{{ .Release.Namespace }}"
+  labels:
+    component: "api"
+  {{ include "labels" . | indent 4 | trim }}
+spec:
+  replicas: {{ .Values.deployment.replicas }}
+  revisionHistoryLimit: 1
+  selector:
+    matchLabels:
+      instance: "{{ .Release.Name }}"
+      component: "api"
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        prometheus.io/path: /api/metrics
+        prometheus.io/port: "{{ .Values.configmap.http_port }}"
+        prometheus.io/scrape: "false"
+        sidecar.istio.io/inject: "{{ .Values.deployment.istio }}"
+        traffic.sidecar.istio.io/excludeOutboundPorts: "{{ .Values.deployment.exclude_outbound_ports }}"
+      labels:
+        component: "api"
+    {{ include "labels" . | indent 8 | trim }}
+    spec:
+      serviceAccountName: "deployment-{{ .Release.Name }}"
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 5
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    instance: "{{ .Release.Name }}"
+                    component: "api"
+                topologyKey: kubernetes.io/hostname
+            - weight: 4
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    instance: "{{ .Release.Name }}"
+                    component: "api"
+                topologyKey: failure-domain.beta.kubernetes.io/zone
+      containers:
+        - name: go
+          image: "dev0603/kafka-go:{{ .Values.revision }}"
+          imagePullPolicy: Always
+          ports:
+            - containerPort: {{ .Values.configmap.grpc_port }}
+              name: grpc
+              protocol: TCP
+            - containerPort: {{ .Values.configmap.http_port }}
+              name: http
+              protocol: TCP
+          env:
+            - name: JAEGER_AGENT_HOST
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: JAEGER_SERVICE_NAME
+              value: "{{ .Release.Name }}"
+            - name: MODE
+              value: "api"
+            - name: ROLLING_RESTART
+              value: "{{ .Values.deployment.rolling_restart }}"
+          livenessProbe:
+            failureThreshold: 2
+            httpGet:
+              path: /api/health
+              port: {{ .Values.configmap.http_port }}
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          readinessProbe:
+            failureThreshold: 2
+            httpGet:
+              path: /api/health
+              port: {{ .Values.configmap.http_port }}
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+          envFrom:
+            - configMapRef:
+                name: "{{ .Release.Name }}"
+          resources:
+            requests:
+              cpu: 5m
+              memory: 120Mi
+      {{- if .Values.nodepool }}
+      nodeSelector:
+        cloud.google.com/gke-nodepool: {{ .Values.nodepool }}
+      {{- end }}
+      restartPolicy: Always
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      enableServiceLinks: false

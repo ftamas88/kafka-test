@@ -1,0 +1,71 @@
+{
+  "type": "record",
+  "name": "transaction",
+  "fields": [
+    {
+      "name": "Id",
+      "type": {
+        "type": "string",
+        "arg.properties": {
+          "regex": "[0-9A-Fa-f]{12}"
+        }
+      }
+    },
+    {
+      "name": "Reference",
+      "type": {
+        "type": "string",
+        "arg.properties": {
+          "regex": "[azA-Z]*",
+          "length": {
+            "min": 5,
+            "max": 16
+          }
+        }
+      }
+    },
+    {
+      "name": "Amount",
+      "type": {
+        "name": "amount",
+        "type": "record",
+        "fields": [
+          {
+            "name": "Value",
+            "type": {
+              "type": "float",
+              "arg.properties": {
+                "range": {
+                  "min": -1000,
+                  "max": 1000
+                }
+              }
+            }
+          },
+          {
+            "name": "Currency",
+            "type": {
+              "type": "string",
+              "arg.properties": {
+                "options": [
+                  "GBR",
+                  "EUR",
+                  "USD"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "BookedTime",
+      "type": {
+        "type": "string",
+        "arg.properties": {
+          "regex": "16099[0-9]{5}"
+        }
+      }
+    }
+  ]
+}

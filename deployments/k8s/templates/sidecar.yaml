@@ -1,0 +1,18 @@
+---
+apiVersion: networking.istio.io/v1beta1
+kind: Sidecar
+metadata:
+  name: "{{ .Release.Name }}"
+  namespace: "{{ .Release.Namespace }}"
+  labels:
+  {{ include "labels" . | indent 4 | trim }}
+spec:
+  workloadSelector:
+    labels:
+      instance: "{{ .Release.Name }}"
+  egress:
+    - hosts:
+        - "istio-system/*"
+        - "./www.googleapis.com"
+        - "./oauth2.googleapis.com"
+        - "./storage.googleapis.com"

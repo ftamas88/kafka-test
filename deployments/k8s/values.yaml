@@ -1,0 +1,11 @@
+---
+deployment:
+  rolling_restart: '0'
+  replicas: 2
+  exclude_outbound_ports: '8200'
+  istio: 'true'
+  private_cluster: false
+
+configmap:
+  scheme: 'http'
+  http_port: 3000

@@ -1,0 +1,7 @@
+---
+apiVersion: v2
+name: kafka-test
+version: 0.1.0
+type: application
+maintainers:
+  - name: tamas

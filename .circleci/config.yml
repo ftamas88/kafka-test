@@ -1,0 +1,31 @@
+version: 2.1
+
+orbs:
+  go: circleci/go@1.1
+
+jobs:
+  build:
+    docker:
+      - image: cimg/go:1.16
+    environment:
+      TEST_RESULTS: /tmp/test-results
+    steps:
+      - checkout
+      - run: mkdir -p $TEST_RESULTS
+      - go/load-cache
+      - go/mod-download
+      - go/save-cache
+
+      - run:
+          name: Test
+          command: |
+            gotestsum --junitfile ${TEST_RESULTS}/gotestsum-report.xml -- -tags integration -coverprofile=${TEST_RESULTS}/coverage.out ./...
+
+      - run:
+          name: Coverage
+          command: go tool cover -html=${TEST_RESULTS}/coverage.out -o=${TEST_RESULTS}/coverage.html
+      - store_artifacts:
+          path: /tmp/test-results
+          destination: raw-test-output
+      - store_test_results:
+          path: /tmp/test-results

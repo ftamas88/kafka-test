@@ -1,0 +1,20 @@
+# Uncomment and adjust if needs access to external endpoints. See README.md for more information.
+#---
+#apiVersion: networking.istio.io/v1beta1
+#kind: ServiceEntry
+#metadata:
+#  name: "{{ .Release.Name }}-blah"
+#  namespace: "{{ .Release.Namespace }}"
+#  labels:
+#    {{ include "labels" . | indent 4 | trim }}
+#spec:
+#  hosts:
+#    - external.domain.com
+#  location: MESH_EXTERNAL
+#  exportTo:
+#    - "."
+#  ports:
+#    - name: https
+#      number: 443
+  #      protocol: HTTPS
+  #  resolution: DNS

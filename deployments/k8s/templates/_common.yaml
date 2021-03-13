@@ -1,0 +1,6 @@
+{{ define "labels" }}
+app: "kafka-test"
+instance: "{{ .Release.Name }}"
+revision: "{{ .Values.revision }}"
+team: "{{ (first .Chart.Maintainers).Name }}"
+{{ end }}
