@@ -10,7 +10,7 @@ services:
     extra_hosts:
       - "localhost: 127.0.0.1"
   kafka1:
-    image: confluentinc/cp-enterprise-kafka:latest
+    image: confluentinc/cp-kafka:latest
     hostname: kafka-host1
     ports:
       - 9091:9091
@@ -29,7 +29,7 @@ services:
     extra_hosts:
       - "localhost: 127.0.0.1"
   kafka2:
-    image: confluentinc/cp-enterprise-kafka:latest
+    image: confluentinc/cp-kafka:latest
     hostname: kafka-host2
     ports:
       - 9092:9092
@@ -48,7 +48,7 @@ services:
     extra_hosts:
       - "localhost: 127.0.0.1"
   kafka3:
-    image: confluentinc/cp-enterprise-kafka:latest
+    image: confluentinc/cp-kafka:latest
     hostname: kafka-host3
     ports:
       - 9093:9093
@@ -104,9 +104,64 @@ services:
       KAFKA_REST_BOOTSTRAP_SERVERS: PLAINTEXT://kafka1:29092,PLAINTEXT://kafka2:29092,PLAINTEXT://kafka3:29092
     extra_hosts:
       - "localhost: 127.0.0.1"
-    
+
+  kafka-connect:
+    image: ftamas88/kafka-connect:latest
+    ports:
+      - 8083:8083
+    container_name: kafka-connect
+    depends_on:
+      - zookeeper
+      - kafka1
+      - kafka2
+      - kafka3
+      - schema-registry
+    environment:
+      CONNECT_BOOTSTRAP_SERVERS: PLAINTEXT://kafka1:29092,PLAINTEXT://kafka2:29092,PLAINTEXT://kafka3:29092
+      CONNECT_REST_PORT: 8083
+      CONNECT_GROUP_ID: connect-group
+      CONNECT_CONFIG_STORAGE_TOPIC: docker-connect-configs
+      CONNECT_OFFSET_STORAGE_TOPIC: docker-connect-offsets
+      CONNECT_STATUS_STORAGE_TOPIC: docker-connect-status
+      CONNECT_CUB_KAFKA_TIMEOUT: 300
+      CONNECT_KEY_CONVERTER: 'org.apache.kafka.connect.storage.StringConverter'
+      CONNECT_VALUE_CONVERTER: 'io.confluent.connect.avro.AvroConverter'
+      CONNECT_VALUE_CONVERTER_SCHEMA_REGISTRY_URL: 'http://localhost:8081'
+#      CONNECT_INTERNAL_KEY_CONVERTER: 'org.apache.kafka.connect.json.JsonConverter'
+#      CONNECT_INTERNAL_VALUE_CONVERTER: 'org.apache.kafka.connect.json.JsonConverter'
+      CONNECT_REST_ADVERTISED_HOST_NAME: 'kafka-connect'
+      CONNECT_LOG4J_ROOT_LOGLEVEL: 'INFO'
+      CONNECT_LOG4J_APPENDER_STDOUT_LAYOUT_CONVERSIONPATTERN: '[%d] %p %x{connector.context}%m (%c:%L)%n'
+      CONNECT_LOG4J_LOGGERS: 'org.apache.kafka.connect.runtime.rest=WARN,org.reflections=ERROR'
+      CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_STATUS_STORAGE_REPLICATION_FACTOR: 1
+      CONNECT_PLUGIN_PATH: '/usr/share/java,/usr/share/confluent-hub-components/'
+    extra_hosts:
+      - "localhost: 127.0.0.1"
+      - "kafka-connect: 127.0.0.1"
+#    command:
+#      - bash
+#      - -c
+#      - |
+#        echo 'Installing connector plugins'
+#        confluent-hub install --no-prompt mmolimar/kafka-connect-fs:1.3.0
+#        # confluent-hub install --no-prompt jcustenborder/kafka-connect-spooldir:2.0.60
+#        confluent-hub install --no-prompt confluentinc/kafka-connect-replicator:6.1.0
+#        confluent-hub install --no-prompt confluentinc/connect-transforms:1.4.0
+#        #
+#        # --------------------------------
+#        # Launch the Kafka Connect worker
+#        /etc/confleunt/docker/run &
+#        #
+#        # Prevent container from exiting
+#        sleep infinity
+    volumes:
+      - ./kafka-connect/data:/data
+      - ./kafka-connect/kafka-connect-fs.properties:/usr/share/confluent-hub-components/mmolimar-kafka-connect-fs/etc/kafka-connect-fs.properties
+
   control-center:
-    image: confluentinc/cp-enterprise-control-center:latest
+    image: confluentinc/cp-control-center:latest
     ports:
       - 9021:9021
     depends_on:

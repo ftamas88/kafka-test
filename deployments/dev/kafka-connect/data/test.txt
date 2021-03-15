@@ -1,0 +1,9 @@
+{
+  "Id": "06123sda",
+  "Reference": "Test ref",
+  "Amount": {
+    "Value": 352.21,
+    "Currency": "AUD"
+  },
+  "BookedTime": 1609995248
+}
