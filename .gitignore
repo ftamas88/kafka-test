@@ -3,6 +3,6 @@
 bin/*
 vendor/
 test/
-tmp/ingest/*
+tmp/ingest/*.json
 
 **/*.log
