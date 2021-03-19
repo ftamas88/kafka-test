@@ -52,12 +52,9 @@ spec:
                 topologyKey: failure-domain.beta.kubernetes.io/zone
       containers:
         - name: go
-          image: "dev0603/kafka-go:{{ .Values.revision }}"
+          image: "ftamas88/kafka-go:{{ .Values.revision }}"
           imagePullPolicy: Always
           ports:
-            - containerPort: {{ .Values.configmap.grpc_port }}
-              name: grpc
-              protocol: TCP
             - containerPort: {{ .Values.configmap.http_port }}
               name: http
               protocol: TCP
