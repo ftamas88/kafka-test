@@ -21,7 +21,7 @@ func main() {
 
 	err = a.Run(ctx)
 	if err != nil {
-		log.Fatal(err)
+		log.Printf("Fatal error: %s", err)
 	}
 
 	runtime.Goexit()

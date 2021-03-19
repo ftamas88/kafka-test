@@ -12,9 +12,7 @@ type App struct {
 	commitHash string
 	router     Component
 	consumer   Component
-	producer	Component
-	cloudProducer Component
-	watcher 	Component
+	watcher    Component
 	closeFuncs []Close
 }
 
@@ -40,14 +38,6 @@ func (app App) Run(ctx context.Context) error {
 
 	eg.Go(func() error {
 		return app.router.Run(egCtx)
-	})
-
-	eg.Go(func() error {
-		return app.producer.Run(egCtx)
-	})
-
-	eg.Go(func() error {
-		return app.cloudProducer.Run(egCtx)
 	})
 
 	eg.Go(func() error {

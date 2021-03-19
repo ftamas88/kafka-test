@@ -1,7 +1,10 @@
 package app
 
 import (
+	"context"
 	"fmt"
+	"os"
+
 	"github.com/ftamas88/kafka-test/internal/config"
 	"github.com/ftamas88/kafka-test/internal/consumer"
 	"github.com/ftamas88/kafka-test/internal/controller"
@@ -9,7 +12,7 @@ import (
 	"github.com/ftamas88/kafka-test/internal/producer"
 	"github.com/ftamas88/kafka-test/internal/routing"
 	"github.com/ftamas88/kafka-test/internal/watcher"
-	"os"
+	"github.com/ftamas88/kafka-test/internal/worker"
 )
 
 // New returns a new instance of the App
@@ -25,16 +28,22 @@ func New() (*App, error) {
 	}
 
 	incomingCh := make(chan domain.Payload, 1)
-	cloudIncomingCh := make(chan domain.Payload, 1)
 	outgoingCh := make(chan domain.Payload, 1)
+
+	quitCh := make(chan struct{})
+
+	d := worker.NewDistributor(incomingCh, quitCh)
+	d.AddWorker(producer.NewCloudKafkaProducer(conf, schemaData))
+	d.AddWorker(producer.NewKafkaProducer(conf, schemaData, outgoingCh))
+
+	err = d.Start(context.Background())
+	d.Listen()
 
 	return &App{
 		version:    version,
 		commitHash: commitHash,
 		consumer:   consumer.NewKafkaConsumer(conf),
-		producer:   producer.NewKafkaProducer(conf, string(schemaData), incomingCh, outgoingCh),
-		cloudProducer: producer.NewCloudKafkaProducer(conf, string(schemaData), cloudIncomingCh),
-		watcher: watcher.NewFileWatcher(incomingCh, cloudIncomingCh, outgoingCh),
+		watcher:    watcher.NewFileWatcher(incomingCh, outgoingCh),
 		router: routing.NewRouter(
 			conf.HTTPPort,
 			&routing.RouterConfig{
@@ -44,6 +53,5 @@ func New() (*App, error) {
 				},
 			},
 		),
-	}, nil
+	}, err
 }
-

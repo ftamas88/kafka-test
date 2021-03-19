@@ -3,24 +3,27 @@ package consumer
 import (
 	"context"
 	"fmt"
-	"github.com/bsm/sarama-cluster"
+	"log"
+
+	cluster "github.com/bsm/sarama-cluster"
 	"github.com/dangkaka/go-kafka-avro"
 	"github.com/ftamas88/kafka-test/internal/config"
-	"log"
 )
 
 type KafkaConsumer struct {
 	cfg *config.Config
 }
 
+// NewKafkaConsumer creates a new instance of the Kafka consumer
 func NewKafkaConsumer(cfg *config.Config) *KafkaConsumer {
 	return &KafkaConsumer{
 		cfg: cfg,
 	}
 }
 
-func (k KafkaConsumer) Run(ctx context.Context) error {
-	log.Printf("servers: %s", k.cfg.Servers)
+// Consume starts consuming from a Kafka topic
+func (k KafkaConsumer) Consume() error {
+	log.Println("Consumer running..")
 
 	consumerCallbacks := kafka.ConsumerCallbacks{
 		OnDataReceived: func(msg kafka.Message) {
@@ -34,10 +37,10 @@ func (k KafkaConsumer) Run(ctx context.Context) error {
 		},
 	}
 
-	c, err := kafka.NewAvroConsumer(
+	cons, err := kafka.NewAvroConsumer(
 		k.cfg.Servers,
 		k.cfg.SchemaRegistryServers,
-		"test",
+		k.cfg.Topic,
 		"consumer-group",
 		consumerCallbacks,
 	)
@@ -45,7 +48,12 @@ func (k KafkaConsumer) Run(ctx context.Context) error {
 		return fmt.Errorf("error during consuming data: %s", err.Error())
 	}
 
-	c.Consume()
+	cons.Consume()
 
 	return nil
+}
+
+// Run runs the Kafka consumer component
+func (k KafkaConsumer) Run(ctx context.Context) error {
+	return k.Consume()
 }

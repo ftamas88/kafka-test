@@ -3,24 +3,25 @@ package producer
 import (
 	"context"
 	"fmt"
+	"log"
+	"time"
+
 	"github.com/ftamas88/kafka-test/internal/config"
 	"github.com/ftamas88/kafka-test/internal/domain"
 	ka "gopkg.in/confluentinc/confluent-kafka-go.v1/kafka"
-	"log"
-	"time"
 )
 
 type CloudKafkaProducer struct {
-	cfg *config.Config
-	schema string
-	incomingCh <- chan domain.Payload
+	cfg        *config.Config
+	schema     string
+	incomingCh chan domain.Payload
 }
 
-func NewCloudKafkaProducer(cfg *config.Config, s string, ch <- chan domain.Payload) *CloudKafkaProducer {
+func NewCloudKafkaProducer(cfg *config.Config, s []byte) *CloudKafkaProducer {
 	return &CloudKafkaProducer{
-		cfg: cfg,
-		schema: s,
-		incomingCh: ch,
+		cfg:        cfg,
+		schema:     string(s),
+		incomingCh: make(chan domain.Payload, 1),
 	}
 }
 
@@ -32,18 +33,18 @@ func (k CloudKafkaProducer) Run(ctx context.Context) error {
 	log.Printf("Cloud Producer running.. %+v", k.cfg.CloudServer)
 
 	producer, err := ka.NewProducer(&ka.ConfigMap{
-		"bootstrap.servers":       k.cfg.CloudServer,
-		"security.protocol":       "SASL_SSL",
-		"sasl.mechanisms":         "PLAIN",
-		"sasl.username":           k.cfg.KafkaCloudKey,
-		"sasl.password":           k.cfg.KafkaCloudSecret})
+		"bootstrap.servers": k.cfg.CloudServer,
+		"security.protocol": "SASL_SSL",
+		"sasl.mechanisms":   "PLAIN",
+		"sasl.username":     k.cfg.KafkaCloudKey,
+		"sasl.password":     k.cfg.KafkaCloudSecret})
 
 	if err != nil {
 		log.Printf("cloud not create cloud producer: %s", err.Error())
 		return fmt.Errorf("could not create cloud producer: %s", err)
 	}
 
-	if err := createTopic(producer, "test"); err != nil {
+	if err := createTopic(producer, k.cfg.Topic); err != nil {
 		log.Printf("could not create cloud topic: %s", err.Error())
 		return fmt.Errorf("could not create cloud topic: %s", err)
 	}
@@ -55,8 +56,7 @@ func (k CloudKafkaProducer) Run(ctx context.Context) error {
 
 	go func() {
 		for {
-			select {
-			case msg := <-k.incomingCh:
+			for msg := range k.incomingCh {
 				log.Printf("received message to publish for cloud: %s", msg.Filename)
 				k.addMsg(ctx, producer, msg)
 			}
@@ -66,6 +66,10 @@ func (k CloudKafkaProducer) Run(ctx context.Context) error {
 	return nil
 }
 
+func (k CloudKafkaProducer) Ingest(msg domain.Payload) {
+	k.incomingCh <- msg
+}
+
 func (k CloudKafkaProducer) addMsg(ctx context.Context, producer *ka.Producer, msg domain.Payload) {
 	key := time.Now().String()
 
@@ -73,11 +77,10 @@ func (k CloudKafkaProducer) addMsg(ctx context.Context, producer *ka.Producer, m
 		return
 	}
 
-	topic := "test"
 	deliveryChan := make(chan ka.Event)
 
 	if err := producer.Produce(&ka.Message{
-		TopicPartition: ka.TopicPartition{Topic: &topic, Partition: ka.PartitionAny},
+		TopicPartition: ka.TopicPartition{Topic: &k.cfg.Topic, Partition: ka.PartitionAny},
 		Value:          msg.Data,
 		Headers:        []ka.Header{{Key: key, Value: []byte("header values are binary")}},
 	}, deliveryChan); err != nil {

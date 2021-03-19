@@ -45,14 +45,6 @@ func (r *Router) Run(ctx context.Context) error {
 		Handler: r.handler,
 	}
 
-	go func() {
-		//<-ctx.Done()
-		//err := server.Shutdown(ctx)
-		//if err != nil {
-		//	log.Fatalf("error shutting down router: %s", err)
-		//}
-	}()
-
 	log.Printf("HTTP server running on port %d", r.httpPort)
 
 	err = server.Serve(listener)

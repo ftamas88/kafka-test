@@ -2,17 +2,17 @@ package producer
 
 import (
 	"context"
-	"github.com/ftamas88/kafka-test/internal/config"
-	"gopkg.in/confluentinc/confluent-kafka-go.v1/kafka"
 	"log"
 	"strings"
 	"time"
+
+	"github.com/ftamas88/kafka-test/internal/config"
+	"gopkg.in/confluentinc/confluent-kafka-go.v1/kafka"
 )
 
 // createTopicFromAdmin creates a topic using the Admin Client API
 func createTopicFromAdmin(cfg *config.Config, topic string) error {
-
-	a, err := kafka.NewAdminClient(&kafka.ConfigMap{"bootstrap.servers": strings.Join(cfg.Servers,",")})
+	a, err := kafka.NewAdminClient(&kafka.ConfigMap{"bootstrap.servers": strings.Join(cfg.Servers, ",")})
 	if err != nil {
 		log.Printf("Failed to create new admin client: %s", err)
 		return err

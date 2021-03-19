@@ -20,10 +20,6 @@ jobs:
           name: Test
           command: |
             gotestsum --junitfile ${TEST_RESULTS}/gotestsum-report.xml -- -tags integration -coverprofile=${TEST_RESULTS}/coverage.out ./...
-
-      - run:
-          name: Coverage
-          command: go tool cover -html=${TEST_RESULTS}/coverage.out -o=${TEST_RESULTS}/coverage.html
       - store_artifacts:
           path: /tmp/test-results
           destination: raw-test-output

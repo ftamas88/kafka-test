@@ -109,7 +109,6 @@ services:
     image: ftamas88/kafka-connect:latest
     ports:
       - 8083:8083
-    container_name: kafka-connect
     depends_on:
       - zookeeper
       - kafka1

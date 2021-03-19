@@ -22,7 +22,7 @@ func TestWellKnownController_Health(t *testing.T) {
 	assert.Equal(t, resp.StatusCode, http.StatusOK)
 	assert.JSONEq(t, `
 		{
-			"operation_id": "app_get",
+			"operation_id": "app_health",
 			"data": {
 				"status": "OK"
 			},

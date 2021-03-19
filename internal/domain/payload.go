@@ -1,7 +1,6 @@
 package domain
 
 type Payload struct {
-	Data []byte
-	Status bool
+	Data     []byte
 	Filename string
 }
