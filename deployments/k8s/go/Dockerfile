@@ -16,7 +16,9 @@ RUN wget -O - -q https://install.goreleaser.com/github.com/golangci/golangci-lin
 RUN go get golang.org/x/tools/cmd/goimports
 RUN yarn global add speccy
 
-RUN go build -mod=readonly -ldflags "-X github.com/ftamas88/kafka-test/internal/app.version=`git describe --tags --dirty` -X github.com/thisisbud/ftamas88/kafka-test/internal/app.commitHash=`git rev-parse HEAD`" -o bin/kafka-test -v cmd/app/*.go
+# RUN go build -mod=readonly -ldflags "-X github.com/ftamas88/kafka-test/internal/app.version=`git describe --tags --dirty` -X github.com/thisisbud/ftamas88/kafka-test/internal/app.commitHash=`git rev-parse HEAD`" -o bin/kafka-test -v cmd/app/*.go
+RUN go build -mod=readonly -o bin/kafka-test -v cmd/app/app.go
+
 FROM alpine:3.13
 
 COPY --from=build /source/bin/kafka-test /source/bin/kafka-test
