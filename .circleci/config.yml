@@ -54,10 +54,3 @@ jobs:
           docker build -f deployments/k8s/go/Dockerfile -t $DOCKERHUB_USER/kafka-go:$TAG .
           docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASSWORD
           docker push $DOCKERHUB_USER/kafka-go:$TAG
-
-      - store_artifacts:
-          path: /tmp/test-results
-          destination: raw-test-output
-
-      - store_test_results:
-          path: /tmp/test-results
