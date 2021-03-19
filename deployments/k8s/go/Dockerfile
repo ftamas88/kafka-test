@@ -1,4 +1,4 @@
-FROM golang:1.16.0-alpine3.13 as build
+FROM golang:1.15.0-alpine3.13 as build
 
 # ARG GITHUB_OAUTH_TOKEN
 # RUN git config --global url."https://$GITHUB_OAUTH_TOKEN:@github.com/".insteadOf "https://github.com/"
@@ -8,7 +8,7 @@ RUN sed -i 's/http\:\/\/dl-cdn.alpinelinux.org/http\:\/\/dl-4.alpinelinux.org/g'
 #ENV CGO_ENABLED=0
 #ENV go enw -w CGO_ENABLED=0
 RUN go env -w GOPRIVATE=github.com/ftamas88/*
-RUN go env -w  GO111MODULE=off
+RUN go env -w  GO111MODULE=auto
 
 RUN addgroup -g 3000 -S tamas
 RUN adduser -u 3000 -D -S tamas -G tamas
@@ -21,7 +21,7 @@ RUN go get golang.org/x/tools/cmd/goimports
 COPY . /source
 WORKDIR /source
 
-RUN CGO_ENABLED=0 GO111MODULE=off go build -ldflags="-w -s" -o ./bin/app -v ./cmd/app/app.go
+RUN CGO_ENABLED=0 go build -ldflags="-w -s" -o ./bin/app -v ./cmd/app/app.go
 
 FROM alpine:3.13
 
