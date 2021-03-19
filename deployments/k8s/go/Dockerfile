@@ -21,7 +21,8 @@ RUN go get golang.org/x/tools/cmd/goimports
 COPY . /source
 WORKDIR /source
 
-RUN go get ./...
+RUN go get -d -v ./...
+RUN go install -v ./...
 RUN CGO_ENABLED=0 go build -ldflags="-w -s" -o ./bin/app -v ./cmd/app/app.go
 
 FROM alpine:3.13
