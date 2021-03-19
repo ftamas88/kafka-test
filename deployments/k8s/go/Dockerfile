@@ -23,7 +23,7 @@ WORKDIR /source
 RUN go mod download
 RUN go get -d -v ./...
 # RUN go install -v ./...
-RUN CGO_ENABLED=0 go build -tags static_all,musl,netgo -o ./bin/app -ldflags "-w -s -X" -v ./cmd/app/app.go
+RUN GOOS=linux GOARCH=amd64 go build -tags static_all,musl,netgo -o ./bin/app -ldflags "-w -s -X" -v ./cmd/app/app.go
 
 FROM alpine:3.13
 
