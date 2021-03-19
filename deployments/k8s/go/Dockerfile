@@ -1,4 +1,4 @@
-FROM golang:1.15.0-alpine3.13 as build
+FROM golang:1.15.10-alpine3.13 as build
 
 # ARG GITHUB_OAUTH_TOKEN
 # RUN git config --global url."https://$GITHUB_OAUTH_TOKEN:@github.com/".insteadOf "https://github.com/"
