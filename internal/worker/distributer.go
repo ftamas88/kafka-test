@@ -3,10 +3,10 @@ package worker
 import (
 	"context"
 	"fmt"
+	"log"
 	"reflect"
 
 	"github.com/ftamas88/kafka-test/internal/domain"
-	"golang.org/x/sync/errgroup"
 )
 
 type distributor struct {
@@ -28,20 +28,18 @@ func (d *distributor) AddWorker(w Worker) {
 }
 
 func (d *distributor) Start(ctx context.Context) error {
-	eg, egCtx := errgroup.WithContext(ctx)
-
 	for k, worker := range d.workers {
 		fmt.Printf("Running Worker [%d][%s]\n", k, reflect.TypeOf(worker).String())
 
 		go func(w Worker) {
-			eg.Go(func() error {
-				return w.Run(egCtx)
-			})
+			if err := w.Run(ctx); err != nil {
+				log.Fatalf("unable to run worker: %s", err.Error())
+			}
 		}(worker)
 
 	}
 
-	return eg.Wait()
+	return nil
 }
 
 func (d *distributor) Listen() {

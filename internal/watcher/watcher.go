@@ -100,12 +100,12 @@ func (f FileWatcher) watchFileCreation(watcher *fsnotify.Watcher, lastFile strin
 					}
 					log.Printf("File change detected: [%s]. Publishing [%s]", lastFile, event.Op)
 
-					go func() {
+					go func(fName string) {
 						f.incoming <- domain.Payload{
 							Data:     r,
-							Filename: lastFile,
+							Filename: fName,
 						}
-					}()
+					}(lastFile)
 
 				}
 			case err, ok := <-watcher.Errors:

@@ -1,5 +1,8 @@
 # This file is the development Makefile for the project in this repository.
 # All variables listed here are used as substitution in these Makefile targets.
+include .env
+export
+
 DOCKER_COMPOSE := docker-compose -f deployments/development/docker-compose.yml
 USER_ID := $(shell id -u)
 
@@ -54,7 +57,7 @@ run: build ## Builds project binary and executes it.
 
 .PHONY: build
 build:  ## Builds project binary.
-	go build -ldflags "-w -s -X $(LD_VERSION) -X $(LD_COMMIT)" -race -o ./bin/$(SERVICE_NAME) -v ./cmd/app/app.go
+	go build -ldflags "-w -s" -race -o ./bin/$(SERVICE_NAME) -v ./cmd/app/app.go
 
 .PHONY: full
 full: clean build fmt lint test ## Cleans up, builds the service, reformats code, lints and runs the test suite.

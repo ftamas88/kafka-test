@@ -47,7 +47,7 @@ Sample:
   "BookedTime" : "1609911988"
 }
 ```
-This will generate a file in the `/tmo/ingest/` folder
+This will generate a file in the `/tmp/ingest/` folder
 
 ### Formatting, linting and tests
 ```
