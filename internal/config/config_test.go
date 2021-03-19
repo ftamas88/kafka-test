@@ -20,7 +20,7 @@ func Test_Default(t *testing.T) {
 	assert.Equal(t, conf.CloudSchemaRegistryServers, es)
 	assert.Equal(t, conf.SchemaRegistryServers, []string{"http://localhost:8081"})
 	assert.Equal(t, conf.CloudServer, "")
-	assert.Equal(t, conf.Servers, []string{"http://localhost:9092"})
+	assert.Equal(t, conf.Servers, []string{"localhost:9092"})
 }
 
 func Test_Configured(t *testing.T) {
