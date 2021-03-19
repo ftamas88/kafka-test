@@ -1,6 +1,6 @@
 module github.com/ftamas88/kafka-test
 
-go 1.16
+go 1.15
 
 require (
 	github.com/bsm/sarama-cluster v2.1.15+incompatible
