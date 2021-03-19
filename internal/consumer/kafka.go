@@ -1,7 +1,9 @@
 package consumer
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 
@@ -27,7 +29,10 @@ func (k KafkaConsumer) Consume() error {
 
 	consumerCallbacks := kafka.ConsumerCallbacks{
 		OnDataReceived: func(msg kafka.Message) {
-			fmt.Println("Message: " + msg.Value)
+			// Just for better readability
+			var prettyJSON bytes.Buffer
+			_ = json.Indent(&prettyJSON, []byte(msg.Value), "", "\t")
+			fmt.Printf("Message: [%s]\n", prettyJSON.String())
 		},
 		OnError: func(err error) {
 			fmt.Println("Consumer error", err)
