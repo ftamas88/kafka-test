@@ -23,11 +23,6 @@ jobs:
           name: Test
           command: |
             gotestsum --junitfile ${TEST_RESULTS}/gotestsum-report.xml -- -tags integration -coverprofile=${TEST_RESULTS}/coverage.out ./...
-      - store_artifacts:
-          path: /tmp/test-results
-          destination: raw-test-output
-      - store_test_results:
-          path: /tmp/test-results
 
       - setup_remote_docker:
           version: 19.03.13
@@ -39,3 +34,10 @@ jobs:
           docker build -f deployments/k8s/go/Dockerfile -t $DOCKERHUB_USER/kafka-go:$TAG .
           echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
           docker push $DOCKERHUB_USER/kafka-go:$TAG
+
+      - store_artifacts:
+          path: /tmp/test-results
+          destination: raw-test-output
+
+      - store_test_results:
+          path: /tmp/test-results

@@ -1,6 +1,6 @@
 module github.com/ftamas88/kafka-test
 
-go 1.15
+go 1.16
 
 require (
 	github.com/bsm/sarama-cluster v2.1.15+incompatible
@@ -9,7 +9,6 @@ require (
 	github.com/dangkaka/go-kafka-avro v0.0.0-20200609051134-e714c259f1e9
 	github.com/fsnotify/fsnotify v1.4.9
 	github.com/golang/snappy v0.0.3 // indirect
-	github.com/google/go-cmp v0.5.4 // indirect
 	github.com/gorilla/mux v1.8.0
 	github.com/kr/text v0.2.0 // indirect
 	github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e // indirect
