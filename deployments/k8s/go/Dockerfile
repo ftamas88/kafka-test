@@ -7,8 +7,8 @@ RUN sed -i 's/http\:\/\/dl-cdn.alpinelinux.org/http\:\/\/dl-4.alpinelinux.org/g'
 
 #ENV CGO_ENABLED=0
 #ENV go enw -w CGO_ENABLED=0
-RUN go env -w GOPRIVATE=github.com/ftamas88/*
-RUN go env -w  GO111MODULE=auto
+#RUN go env -w GOPRIVATE=github.com/ftamas88/*
+#RUN go env -w  GO111MODULE=auto
 
 RUN addgroup -g 3000 -S tamas
 RUN adduser -u 3000 -D -S tamas -G tamas
@@ -23,7 +23,7 @@ WORKDIR /source
 RUN go mod download
 RUN go get -d -v ./...
 # RUN go install -v ./...
-RUN GOOS=linux GOARCH=amd64 go build -tags static_all,musl,netgo -o ./bin/app -ldflags "-w -s -X" -v ./cmd/app/app.go
+RUN GOOS=linux GOARCH=amd64 go build -tags static_all,musl,netgo -o ./bin/app -ldflags "-w -s" -v ./cmd/app/app.go
 
 FROM alpine:3.13
 
