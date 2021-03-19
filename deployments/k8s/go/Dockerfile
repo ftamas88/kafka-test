@@ -13,24 +13,20 @@ RUN go env -w  GO111MODULE=auto
 RUN addgroup -g 3000 -S tamas
 RUN adduser -u 3000 -D -S tamas -G tamas
 
-RUN apk add git gcc g++ # libc-dev make yarn
-RUN apk add librdkafka-dev build-base
+RUN apk add git gcc g++ libc-dev make librdkafka
 RUN wget -O - -q https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s latest
 RUN go get golang.org/x/tools/cmd/goimports
-# RUN yarn global add speccy
 
 COPY . /source
 WORKDIR /source
 
 RUN go get -d -v ./...
-RUN go install -v ./...
+# RUN go install -v ./...
 RUN CGO_ENABLED=0 go build -ldflags="-w -s" -tags static_all,netgo -o ./bin/app -v ./cmd/app/app.go
 
 FROM alpine:3.13
 
 COPY --from=build /source/bin/app /app
-
-RUN apk add --no-cache librdkafka
 
 WORKDIR /source
 ENTRYPOINT ["/app"]
