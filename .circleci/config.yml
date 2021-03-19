@@ -4,7 +4,7 @@ orbs:
   go: circleci/go@1.1
 
 jobs:
-  build:
+  test:
     docker:
       - image: cimg/go:1.16
         auth:
@@ -24,6 +24,26 @@ jobs:
           command: |
             gotestsum --junitfile ${TEST_RESULTS}/gotestsum-report.xml -- -tags integration -coverprofile=${TEST_RESULTS}/coverage.out ./...
 
+      - store_artifacts:
+          path: /tmp/test-results
+          destination: raw-test-output
+
+      - store_test_results:
+          path: /tmp/test-results
+  build:
+    docker:
+      - image: cimg/go:1.16
+        auth:
+          username: $DOCKERHUB_USER
+          password: $DOCKERHUB_PASSWORD
+    environment:
+      TEST_RESULTS: /tmp/test-results
+    steps:
+      - checkout
+      - go/load-cache
+      - go/mod-download
+      - go/save-cache
+
       - setup_remote_docker:
           version: 19.03.13
           docker_layer_caching: false
@@ -32,7 +52,7 @@ jobs:
       - run: |
           TAG=0.1.$CIRCLE_BUILD_NUM
           docker build -f deployments/k8s/go/Dockerfile -t $DOCKERHUB_USER/kafka-go:$TAG .
-          echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+          docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASSWORD
           docker push $DOCKERHUB_USER/kafka-go:$TAG
 
       - store_artifacts:
