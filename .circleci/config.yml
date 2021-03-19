@@ -36,6 +36,6 @@ jobs:
       # build and push Docker image
       - run: |
           TAG=0.1.$CIRCLE_BUILD_NUM
-          docker build -f deployments/k8s/Dockerfile -t $DOCKERHUB_USER/kafka-go:$TAG .
+          docker build -f deployments/k8s/go/Dockerfile -t $DOCKERHUB_USER/kafka-go:$TAG .
           echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
           docker push $DOCKERHUB_USER/kafka-go:$TAG
